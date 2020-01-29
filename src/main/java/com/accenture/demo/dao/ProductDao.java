@@ -31,13 +31,6 @@ public class ProductDao implements Dao<Product> {
 
     @Override
     public Optional<Product> save(Product product) {
-        Product existingProduct = productRepository.findByName(product.getName());
-
-        if (existingProduct != null) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Product already exists", new EntityExistsException());
-        }
-
         return Optional.of(productRepository.save(product));
     }
 
@@ -54,7 +47,7 @@ public class ProductDao implements Dao<Product> {
     }
 
     @Override
-    public List getAll() {
+    public List<Product> getAll() {
         return productRepository.findAll();
     }
 
@@ -70,5 +63,9 @@ public class ProductDao implements Dao<Product> {
         }
 
         return true;
+    }
+
+    public Product findByName(String name) {
+        return productRepository.findByName(name);
     }
 }
