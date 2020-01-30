@@ -1,20 +1,23 @@
 package com.accenture.demo.controller.exception;
 
 import java.text.MessageFormat;
+import java.util.NoSuchElementException;
 
-public class ProductNotFoundException extends Exception {
-    private Long id;
+public class ProductNotFoundException extends NoSuchElementException {
+    private String field;
+    private String value;
 
-    public static ProductNotFoundException createWith(Long id) {
-        return new ProductNotFoundException(id);
+    public static ProductNotFoundException createWith(String field, String value) {
+        return new ProductNotFoundException(field, value);
     }
 
-    private ProductNotFoundException(Long id) {
-        this.id = id;
+    private ProductNotFoundException(String field, String value) {
+        this.field = field;
+        this.value = value;
     }
 
     @Override
     public String getMessage() {
-        return MessageFormat.format("Product with id {0} not found.", id);
+        return MessageFormat.format("Product with {0}: {1} not found.", field, value);
     }
 }

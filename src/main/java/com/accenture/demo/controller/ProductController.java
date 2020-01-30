@@ -1,12 +1,11 @@
 package com.accenture.demo.controller;
 
 import com.accenture.demo.controller.exception.ProductNotFoundException;
-import com.accenture.demo.dao.ProductDao;
+import com.accenture.demo.service.ProductHandler;
 import com.accenture.demo.dto.ProductDto;
 import com.accenture.demo.dto.ProductListDto;
 import com.accenture.demo.entity.Product;
 import com.accenture.demo.repository.ProductRepository;
-import com.accenture.demo.service.ProductMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +28,7 @@ public class ProductController {
     private ProductRepository productRepository;
 
     @Autowired
-    private ProductDao productDao;
+    private ProductHandler productHandler;
 
     @Autowired
     private ProductListDto productListDto;
@@ -37,13 +36,13 @@ public class ProductController {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     @ResponseBody
     public ProductListDto getAllProducts() {
-        productListDto.setProducts(ProductMapper.map(productDao.getAll()));
+        productListDto.setProducts(ProductHandler.convertToDto(productHandler.getAll()));
         return productListDto;
     }
 
     @RequestMapping(value = "/message", method = RequestMethod.GET)
     public String getMessage(@RequestParam("id") Long id) {
-        Product product = productDao.get(id).get();
+        Product product = productHandler.get(id).get();
         NumberFormat nf = NumberFormat.getInstance(new Locale("us", "US"));
         nf.setMinimumFractionDigits(2);
 
@@ -54,30 +53,30 @@ public class ProductController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
     public ProductDto getProduct(@PathVariable("id") Long id) {
-        return ProductMapper.map(productDao.get(id).get());
+        return ProductHandler.convertToDto(productHandler.get(id).get());
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.PUT)
     public Product save(@RequestBody Product product) {
-        Product existingProduct = productDao.findByName(product.getName());
+        Product existingProduct = productHandler.findByName(product.getName());
         if (existingProduct != null) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "Product already exists", new EntityExistsException());
         }
 
-        return productDao.save(product).get();
+        return productHandler.save(product).get();
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
     public String update(ProductDto productDto) {
-        Product product = ProductMapper.convertToEntity(productDto);
+        Product product = ProductHandler.convertToEntity(productDto);
 
-        return productDao.update(product) ? "updated" : "can't update";
+        return productHandler.update(product) ? "updated" : "can't update";
     }
 
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
     public String delete(@PathVariable("id") Long id) throws ProductNotFoundException {
-        return productDao.delete(id) ? "deleted" : "something went wrong";
+        return productHandler.delete(id) ? "deleted" : "something went wrong";
     }
 
     @GetMapping(path = "/list")

@@ -1,16 +1,14 @@
 package com.accenture.demo.controller;
 
 import com.accenture.demo.DemoApplication;
-import com.accenture.demo.dao.ProductDao;
+import com.accenture.demo.service.ProductHandler;
 import com.accenture.demo.entity.Product;
-import com.accenture.demo.repository.ProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
@@ -45,7 +44,7 @@ class ProductControllerTest {
     ObjectMapper objectMapper;
 
     @MockBean
-    private ProductDao mockProductDao;
+    private ProductHandler mockProductHandler;
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -56,8 +55,8 @@ class ProductControllerTest {
         product.setId(1L);
         product.setName("Name");
         product.setDescription("Desc");
-        product.setPrice(12.99F);
-        when(mockProductDao.get(1L)).thenReturn(Optional.of(product));
+        product.setPrice(BigDecimal.valueOf(12.99));
+        when(mockProductHandler.get(1L)).thenReturn(Optional.of(product));
 
         mockMvc.perform(get("/product/1"))
                 /*.andDo(print())*/
@@ -68,7 +67,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.description", is("Desc")))
                 .andExpect(jsonPath("$.price", is(12.99)));
 
-        verify(mockProductDao, times(1)).get(1L);
+        verify(mockProductHandler, times(1)).get(1L);
     }
 
     @Test
@@ -76,7 +75,7 @@ class ProductControllerTest {
         Product product = new Product();
         product.setId(2L);
         product.setName("Product Name");
-        when(mockProductDao.findByName("Product Name")).thenReturn(product);
+        when(mockProductHandler.findByName("Product Name")).thenReturn(product);
 
         HttpSessionCsrfTokenRepository httpSessionCsrfTokenRepository = new HttpSessionCsrfTokenRepository();
         CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());

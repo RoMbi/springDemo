@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
+import java.math.BigDecimal;
 
 @Entity
 @Getter
@@ -19,7 +20,7 @@ public class Product {
 
     @Digits(integer = 6, fraction = 2)
     @Column(nullable = false, columnDefinition = "float(10,2)")
-    private Float price;
+    private BigDecimal price;
 
     private String description;
 }
